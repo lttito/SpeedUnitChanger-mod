@@ -1,4 +1,4 @@
-Speed Unit Changer - Simple plugin to visualize current speed in different units.
+﻿Speed Unit Changer - Simple plugin to visualize current speed in different units.
 
 Displays speed in different units in Navball.
 Current speed units displayed:
@@ -17,6 +17,7 @@ Now it also displays a window with the altitude depending on the unit selected f
 - feet
 
 Changelog:
+version 1.5.0: Added different Altitude modes to Navball title.
 version 1.4.3: 1.2 Compatibility. Also optimized code to not create several instances and less if checks.
 version 1.4.2: 1.1.X Compatibility. Now including Mach number as Unit to choose.
 version 1.4.1: Hotfix to enable showing the mod in the toolbar more than once in a game session
