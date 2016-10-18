@@ -182,8 +182,6 @@ namespace SpeedUnitChanger
                 showAltitude = false;
                 currentAltitudeIndication = METERS;
             }
-
-            //AltitudeWindow = new Rect(winPosX, winPosY, 100, 70);
         }
 
         private void SaveSettings()
