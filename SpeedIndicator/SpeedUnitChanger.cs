@@ -89,6 +89,16 @@ namespace SpeedUnitChanger
         /// </summary>
         private const int FEET = 4;
 
+        /// <summary>
+        /// Contant to automatically change unit to M to avoid wrapping / overflow.
+        /// </summary>
+        private const int THRESHOLD_TO_AUTO_CHANGE_M = 10000000;
+
+        /// <summary>
+        /// Contant to automatically change unit to K to avoid wrapping / overflow.
+        /// </summary>
+        private const int THRESHOLD_TO_AUTO_CHANGE_K = 100000;
+
         #endregion Constants
 
         /// <summary>
@@ -100,8 +110,6 @@ namespace SpeedUnitChanger
         /// App variables.
         /// </summary>
         private string currentSpeed = "";
-        private int winPosX;
-        private int winPosY;
         private string currentUnit = "";
         private double altitude = 0.0;
         private string altitudeText;
@@ -109,21 +117,18 @@ namespace SpeedUnitChanger
         private int currentAltitudeIndication = METERS;
         private bool showAltitude = false;
         private ConfigNode config;
-        private Rect AltitudeWindow;
         private Rect ConfigurationWindow;
         private string[] content;
         private string[] altitudeUnitNames;
         private SpeedDisplay display;
-        private int timeToChangeApsis = 0;
-        private bool showApoapsis = true;
-        private int timeToChangeApsisThreshold = 500;
-
+        private float stockTitleFontSize;
+        private float stockSpeedFontSize;
         /// <summary>
         /// Object contructor.
         /// </summary>
         public SpeedUnitChanger()
         {
-            this.ConfigurationWindow = new Rect(50, 50, 185, 380);
+            this.ConfigurationWindow = new Rect(50, 50, 280, 380);
             this.content = new string[6];
             this.altitudeUnitNames = new string[5];
             content[METERS_PER_SECOND] = "Meters per second (m/s)";
@@ -164,38 +169,21 @@ namespace SpeedUnitChanger
                 config = ConfigNode.Load(CONFIG_FILE);
                 int val = Convert.ToInt32(config.GetValue("unit"));
                 bool altWin = Convert.ToBoolean(config.GetValue("alt"));
-                int altWinX = Convert.ToInt32(config.GetValue("x"));
-                int altWinY = Convert.ToInt32(config.GetValue("y"));
                 int altunit = Convert.ToInt32(config.GetValue("altunit"));
-                int ttcAt;
-                try
-                {
-                    ttcAt = Convert.ToInt32(config.GetValue("changeThreshold"));
-                }
-                catch
-                {
-                    ttcAt = 500;
-                }
 
                 config = null;
                 currentSpeedIndication = val;
                 showAltitude = altWin;
-                winPosX = altWinX;
-                winPosY = altWinY;
-                timeToChangeApsisThreshold = ttcAt;
                 currentAltitudeIndication = altunit;
             }
             catch (Exception)
             {
                 currentSpeedIndication = METERS_PER_SECOND;
                 showAltitude = false;
-                winPosX = 50;
-                winPosY = 50;
                 currentAltitudeIndication = METERS;
-                timeToChangeApsisThreshold = 500;
             }
 
-            AltitudeWindow = new Rect(winPosX, winPosY, 100, 70);
+            //AltitudeWindow = new Rect(winPosX, winPosY, 100, 70);
         }
 
         private void SaveSettings()
@@ -203,10 +191,7 @@ namespace SpeedUnitChanger
             ConfigNode savingNode = new ConfigNode();
             savingNode.AddValue("unit", currentSpeedIndication.ToString());
             savingNode.AddValue("alt", showAltitude.ToString());
-            savingNode.AddValue("x", AltitudeWindow.x.ToString());
-            savingNode.AddValue("y", AltitudeWindow.y.ToString());
             savingNode.AddValue("altunit", currentAltitudeIndication.ToString());
-            savingNode.AddValue("changeThreshold", timeToChangeApsisThreshold.ToString());
             try
             {
                 savingNode.Save(CONFIG_FILE);
@@ -233,6 +218,11 @@ namespace SpeedUnitChanger
             if (display == null)
             {
                 display = GameObject.FindObjectOfType<SpeedDisplay>();
+                if (display != null)
+                {
+                    stockSpeedFontSize = display.textSpeed.fontSize;
+                    stockTitleFontSize = display.textTitle.fontSize;
+                }
             }
             if (ToolBarEnabled)
             {
@@ -246,11 +236,17 @@ namespace SpeedUnitChanger
         /// <param name="windowId"></param>
         public void OnWindow(int windowId)
         {
-            GUILayout.BeginVertical(GUILayout.Width(170f));
-            showAltitude = GUILayout.Toggle(showAltitude, "Show Altitude");
+            GUILayout.BeginVertical(GUILayout.Width(260f));
+            showAltitude = GUILayout.Toggle(showAltitude, "Show ASL / Ap - Pe / Target Name");
+            if (!showAltitude)
+            {
+                FlightGlobals.SetSpeedMode(FlightGlobals.speedDisplayMode);
+                display.textSpeed.fontSize = stockSpeedFontSize;
+                display.textTitle.fontSize = stockTitleFontSize;
+            }
             GUILayout.Label("Speed unit selection");
             currentSpeedIndication = GUILayout.SelectionGrid(currentSpeedIndication, content, 1);
-            GUILayout.Label("Altitude unit selection");
+            GUILayout.Label("Altitude unit selection - ASL Mode only");
             currentAltitudeIndication = GUILayout.SelectionGrid(currentAltitudeIndication, altitudeUnitNames, 1);
             GUILayout.EndVertical();
             GUI.DragWindow();
@@ -259,13 +255,16 @@ namespace SpeedUnitChanger
         public void LateUpdate()
         {
             FlightGlobals.SpeedDisplayModes speedDisplayMode = FlightGlobals.speedDisplayMode;
-            if (currentSpeedIndication != METERS_PER_SECOND)
+            if (display != null)
             {
-                UpdateSpeedValue(speedDisplayMode);
-            }
-            if (showAltitude)
-            {
-                UpdateAltitudeValue(speedDisplayMode);
+                if (currentSpeedIndication != METERS_PER_SECOND)
+                {
+                    UpdateSpeedValue(speedDisplayMode);
+                }
+                if (showAltitude)
+                {
+                    UpdateAltitudeValue(speedDisplayMode);
+                }
             }
         }
 
@@ -357,14 +356,20 @@ namespace SpeedUnitChanger
 
         private void UpdateAltitudeValue(FlightGlobals.SpeedDisplayModes speedDisplayMode)
         {
-            switch(speedDisplayMode)
+            double realAltitude = FlightGlobals.ActiveVessel.terrainAltitude > 0 ? FlightGlobals.ActiveVessel.altitude - FlightGlobals.ActiveVessel.terrainAltitude : FlightGlobals.ActiveVessel.altitude;
+            switch (speedDisplayMode)
             {
                 case FlightGlobals.SpeedDisplayModes.Surface:
                     switch (currentAltitudeIndication)
                     {
                         case METERS:
-                            altitude = FlightGlobals.ActiveVessel.altitude;
-                            if (altitude > 100000)
+                            altitude = realAltitude;
+                            if (altitude > THRESHOLD_TO_AUTO_CHANGE_M)
+                            {
+                                altitude /= 1000000;
+                                altitudeText = altitude.ToString("0.000") + " Mm";
+                            }
+                            else if (altitude > THRESHOLD_TO_AUTO_CHANGE_K)
                             {
                                 altitude /= 1000;
                                 altitudeText = altitude.ToString("0.000") + " km";
@@ -375,79 +380,91 @@ namespace SpeedUnitChanger
                             }
                             break;
                         case KILOMETERS:
-                            altitude = FlightGlobals.ActiveVessel.altitude / 1000;
-                            altitudeText = altitude.ToString("0.000") + " km";
-                            break;
-                        case MILES:
-                            altitude = FlightGlobals.ActiveVessel.altitude / 1609.344;
-                            altitudeText = altitude.ToString("0.000") + " mi";
-                            break;
-                        case NAUTICAL_MILES:
-                            altitude = FlightGlobals.ActiveVessel.altitude / 1852;
-                            altitudeText = altitude.ToString("0.000") + " nmi";
-                            break;
-                        case FEET:
-                            altitude = FlightGlobals.ActiveVessel.altitude * 3.2808399;
-                            if (altitude > 100000)
+                            altitude = realAltitude;
+                            if (altitude > THRESHOLD_TO_AUTO_CHANGE_M)
                             {
-                                altitude /= 1000;
-                                altitudeText = altitude.ToString("0.000") + " kft";
+                                altitude /= 1000000;
+                                altitudeText = altitude.ToString("0.000") + " Mm";
                             }
                             else
                             {
-                                altitudeText = altitude.ToString("0.000") + " ft";
+                                altitude /= 1000;
+                                altitudeText = altitude.ToString("0.000") + " km";
                             }
                             break;
+                        case MILES:
+                            altitude = realAltitude / 1609.344;
+                            altitudeText = altitude.ToString("0.000") + " mi";
+                            break;
+                        case NAUTICAL_MILES:
+                            altitude = realAltitude / 1852;
+                            altitudeText = altitude.ToString("0.000") + " nmi";
+                            break;
+                        case FEET:
+                            altitude = realAltitude * 3.2808399;
+                            altitudeText = altitude.ToString("0.000") + " ft";
+                            break;
                     }
-
-                    string textTitle = display.textTitle.text;
+                    display.textTitle.fontSize = stockTitleFontSize;
+                    display.textSpeed.fontSize = stockSpeedFontSize;
+                    display.textTitle.enableWordWrapping = false;
+                    display.textTitle.OverflowMode = TMPro.TextOverflowModes.Overflow;
                     display.textTitle.text = "ASL: " + altitudeText;
                     break;
                 case FlightGlobals.SpeedDisplayModes.Orbit:
-                    double apsis = FlightGlobals.ActiveVessel.GetCurrentOrbit().PeA;
-                    string apsisLabel;
-                    string apsisUnit = "m";
-                    if (showApoapsis || apsis < 0)
+                    double apoapsis = FlightGlobals.ActiveVessel.GetCurrentOrbit().ApA;
+                    string apoapsisUnit = "m";
+                    //Apoapsis: First check to avoid overflow: m to Mm
+                    if (apoapsis > THRESHOLD_TO_AUTO_CHANGE_M)
                     {
-                        //Apoapsis
-                        apsis = FlightGlobals.ActiveVessel.GetCurrentOrbit().ApA;                        
-                        apsisLabel = "Ap";
-                        timeToChangeApsis++;
+                        apoapsis = apoapsis / 1000000;
+                        apoapsisUnit = "Mm";
                     }
-                    else
+                    //Apoapsis: Second check to avoid overflow: m to km
+                    else if (apoapsis > 100000)
                     {
-                        //Periapsis
-                        apsis = FlightGlobals.ActiveVessel.GetCurrentOrbit().PeA;
-                        apsisLabel = "Pe";
-                        timeToChangeApsis++;
+                        apoapsis = apoapsis / 1000;
+                        apoapsisUnit = "km";
                     }
-                    //First check to avoid overflow: m to km
-                    if (apsis > 100000)
+                    
+                    StringBuilder titleDisplayText = new StringBuilder();
+                    titleDisplayText.Append(string.Format("Ap:{0}{1}", apoapsis.ToString("0.000"), apoapsisUnit));
+                    display.textSpeed.fontSize = stockSpeedFontSize;
+                    display.textTitle.fontSize = stockTitleFontSize;
+
+                    double periapsis = FlightGlobals.ActiveVessel.GetCurrentOrbit().PeA;
+                    if (periapsis > 0)
                     {
-                        apsis = apsis / 1000;
-                        apsisUnit = "km";
-                    }
-                    //Second check to avoid overflow: km to Mm
-                    if (apsis > 10000)
-                    {
-                        apsis = apsis / 1000;
-                        apsisUnit = "Mm";
+                        string periapsisUnit = "m";
+                        //Periapsis: First check to avoid overflow: m to km
+                        if (periapsis > 100000)
+                        {
+                            periapsis = periapsis / 1000;
+                            periapsisUnit = "km";
+                        }
+                        //Periapsis: Second check to avoid overflow: km to Mm
+                        else if (periapsis > THRESHOLD_TO_AUTO_CHANGE_M)
+                        {
+                            periapsis = periapsis / 1000000;
+                            periapsisUnit = "Mm";
+                        }
+                        
+                        titleDisplayText.Append(Environment.NewLine);
+                        titleDisplayText.Append(string.Format("Pe:{0}{1}", periapsis.ToString("0.000"), periapsisUnit));
+                        display.textTitle.fontSize = 10;
+                        display.textSpeed.fontSize = 11;
+                        display.textTitle.enableWordWrapping = false;
+                        display.textTitle.OverflowMode = TMPro.TextOverflowModes.Overflow;
                     }
 
-                    display.textTitle.text = string.Format("{0}:{1}{2}", apsisLabel, apsis.ToString("0.000"), apsisUnit);
-                    if (timeToChangeApsis >= timeToChangeApsisThreshold)
-                    {
-                        showApoapsis = !showApoapsis;
-                        timeToChangeApsis = 0;
-                    }
+                    display.textTitle.text = titleDisplayText.ToString();
                     break;
                 case FlightGlobals.SpeedDisplayModes.Target:
                     string targetText = string.Format("->{0}", FlightGlobals.ActiveVessel.targetObject.GetName());
-                    if (targetText.Length > 25)
-                    {
-                        targetText = targetText.Substring(0, 22) + "...";
-                    }
-                    display.textTitle.fontSize = 5;
+                    display.textTitle.enableWordWrapping = true;
+                    display.textTitle.OverflowMode = TMPro.TextOverflowModes.Ellipsis;
+                    display.textTitle.fontSize = stockTitleFontSize;
+                    display.textSpeed.fontSize = stockSpeedFontSize;
                     display.textTitle.text = targetText;
                     break;
             }
