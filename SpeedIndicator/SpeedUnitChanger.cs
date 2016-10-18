@@ -235,7 +235,7 @@ namespace SpeedUnitChanger
         public void OnWindow(int windowId)
         {
             GUILayout.BeginVertical(GUILayout.Width(260f));
-            showAltitude = GUILayout.Toggle(showAltitude, "Show ASL / Ap - Pe / Target Name");
+            showAltitude = GUILayout.Toggle(showAltitude, "Show AGL / Ap - Pe / Target Name");
             if (!showAltitude)
             {
                 FlightGlobals.SetSpeedMode(FlightGlobals.speedDisplayMode);
@@ -244,7 +244,7 @@ namespace SpeedUnitChanger
             }
             GUILayout.Label("Speed unit selection");
             currentSpeedIndication = GUILayout.SelectionGrid(currentSpeedIndication, content, 1);
-            GUILayout.Label("Altitude unit selection - ASL Mode only");
+            GUILayout.Label("Altitude unit selection - AGL Mode only");
             currentAltitudeIndication = GUILayout.SelectionGrid(currentAltitudeIndication, altitudeUnitNames, 1);
             GUILayout.EndVertical();
             GUI.DragWindow();
@@ -407,7 +407,7 @@ namespace SpeedUnitChanger
                     display.textSpeed.fontSize = stockSpeedFontSize;
                     display.textTitle.enableWordWrapping = false;
                     display.textTitle.OverflowMode = TMPro.TextOverflowModes.Overflow;
-                    display.textTitle.text = "ASL: " + altitudeText;
+                    display.textTitle.text = "AGL: " + altitudeText;
                     break;
                 case FlightGlobals.SpeedDisplayModes.Orbit:
                     double apoapsis = FlightGlobals.ActiveVessel.GetCurrentOrbit().ApA;
