@@ -116,6 +116,7 @@ namespace SpeedUnitChanger
         private int currentSpeedIndication = METERS_PER_SECOND;
         private int currentAltitudeIndication = METERS;
         private bool showAltitude = false;
+        private bool showSpeed = true;
         private ConfigNode config;
         private Rect ConfigurationWindow;
         private string[] content;
@@ -128,7 +129,7 @@ namespace SpeedUnitChanger
         /// </summary>
         public SpeedUnitChanger()
         {
-            this.ConfigurationWindow = new Rect(50, 50, 280, 380);
+            this.ConfigurationWindow = new Rect(50, 50, 280, 400);
             this.content = new string[6];
             this.altitudeUnitNames = new string[5];
             content[METERS_PER_SECOND] = "Meters per second (m/s)";
@@ -151,6 +152,7 @@ namespace SpeedUnitChanger
         {
             //Nothing to Destroy
             SaveSettings();
+            Destroy(this);
         }
 
         /// <summary>
@@ -170,17 +172,20 @@ namespace SpeedUnitChanger
                 int val = Convert.ToInt32(config.GetValue("unit"));
                 bool altWin = Convert.ToBoolean(config.GetValue("alt"));
                 int altunit = Convert.ToInt32(config.GetValue("altunit"));
+                bool sSpeed = Convert.ToBoolean(config.GetValue("sSpeed"));
 
                 config = null;
                 currentSpeedIndication = val;
                 showAltitude = altWin;
                 currentAltitudeIndication = altunit;
+                showSpeed = sSpeed;
             }
             catch (Exception)
             {
                 currentSpeedIndication = METERS_PER_SECOND;
                 showAltitude = false;
                 currentAltitudeIndication = METERS;
+                showSpeed = true;
             }
         }
 
@@ -190,6 +195,7 @@ namespace SpeedUnitChanger
             savingNode.AddValue("unit", currentSpeedIndication.ToString());
             savingNode.AddValue("alt", showAltitude.ToString());
             savingNode.AddValue("altunit", currentAltitudeIndication.ToString());
+            savingNode.AddValue("sSpeed", showSpeed.ToString());
             try
             {
                 savingNode.Save(CONFIG_FILE);
@@ -236,7 +242,11 @@ namespace SpeedUnitChanger
         {
             GUILayout.BeginVertical(GUILayout.Width(260f));
             showAltitude = GUILayout.Toggle(showAltitude, "Show AGL / Ap - Pe / Target Name");
-            if (!showAltitude)
+            if(showAltitude)
+            {
+                showSpeed = GUILayout.Toggle(showSpeed, "Show speed on Orbit Mode");
+            }
+            if (!showAltitude || !showSpeed)
             {
                 FlightGlobals.SetSpeedMode(FlightGlobals.speedDisplayMode);
                 display.textSpeed.fontSize = stockSpeedFontSize;
@@ -255,10 +265,7 @@ namespace SpeedUnitChanger
             FlightGlobals.SpeedDisplayModes speedDisplayMode = FlightGlobals.speedDisplayMode;
             if (display != null)
             {
-                if (currentSpeedIndication != METERS_PER_SECOND)
-                {
-                    UpdateSpeedValue(speedDisplayMode);
-                }
+                UpdateSpeedValue(speedDisplayMode);
                 if (showAltitude)
                 {
                     UpdateAltitudeValue(speedDisplayMode);
@@ -268,96 +275,101 @@ namespace SpeedUnitChanger
 
         private void UpdateSpeedValue(FlightGlobals.SpeedDisplayModes speedDisplayMode)
         {
-            switch (currentSpeedIndication)
+            if (currentSpeedIndication != METERS_PER_SECOND && (showSpeed || speedDisplayMode != FlightGlobals.SpeedDisplayModes.Orbit || speedDisplayMode == FlightGlobals.SpeedDisplayModes.Orbit && !showAltitude))
             {
-                case KILOMETERS_PER_HOUR:
-                    currentUnit = "km/h";
-                    if (speedDisplayMode == FlightGlobals.SpeedDisplayModes.Surface)
-                    {
-                        currentSpeed = (FlightGlobals.ActiveVessel.srfSpeed * 3.6f).ToString("0.0");
-                    }
-                    else if (speedDisplayMode == FlightGlobals.SpeedDisplayModes.Target)
-                    {
-                        currentSpeed = (FlightGlobals.ship_tgtSpeed * 3.6f).ToString("0.0");
-                    }
-                    else
-                    {
-                        currentSpeed = (FlightGlobals.ship_obtSpeed * 3.6f).ToString("0.0");
-                    }
-                    break;
-                case MILES_PER_HOUR:
-                    currentUnit = "mph";
-                    if (speedDisplayMode == FlightGlobals.SpeedDisplayModes.Surface)
-                    {
-                        currentSpeed = (FlightGlobals.ActiveVessel.srfSpeed * 2.23693629f).ToString("0.0");
-                    }
-                    else if (speedDisplayMode == FlightGlobals.SpeedDisplayModes.Target)
-                    {
-                        currentSpeed = (FlightGlobals.ship_tgtSpeed * 2.23693629f).ToString("0.0");
-                    }
-                    else
-                    {
-                        currentSpeed = (FlightGlobals.ship_obtSpeed * 2.23693629f).ToString("0.0");
-                    }
-                    break;
-                case KNOTS:
-                    currentUnit = "knots";
-                    if (speedDisplayMode == FlightGlobals.SpeedDisplayModes.Surface)
-                    {
-                        currentSpeed = (FlightGlobals.ActiveVessel.srfSpeed * 1.94384449f).ToString("0.0");
-                    }
-                    else if (speedDisplayMode == FlightGlobals.SpeedDisplayModes.Target)
-                    {
-                        currentSpeed = (FlightGlobals.ship_tgtSpeed * 1.94384449f).ToString("0.0");
-                    }
-                    else
-                    {
-                        currentSpeed = (FlightGlobals.ship_obtSpeed * 1.94384449f).ToString("0.0");
-                    }
-                    break;
-                case FEET_PER_SECOND:
-                    currentUnit = "ft/s";
-                    if (speedDisplayMode == FlightGlobals.SpeedDisplayModes.Surface)
-                    {
-                        currentSpeed = (FlightGlobals.ActiveVessel.srfSpeed * 3.2808399f).ToString("0.0");
-                    }
-                    else if (speedDisplayMode == FlightGlobals.SpeedDisplayModes.Target)
-                    {
-                        currentSpeed = (FlightGlobals.ship_tgtSpeed * 3.2808399f).ToString("0.0");
-                    }
-                    else
-                    {
-                        currentSpeed = (FlightGlobals.ship_obtSpeed * 3.2808399f).ToString("0.0");
-                    }
-                    break;
-                case MACH:
-                    currentUnit = "Mach";
-                    if (speedDisplayMode == FlightGlobals.SpeedDisplayModes.Surface)
-                    {
-                        currentSpeed = (FlightGlobals.ActiveVessel.mach).ToString("0.00");
-                    }
-                    else if (speedDisplayMode == FlightGlobals.SpeedDisplayModes.Target)
-                    {
-                        currentSpeed = FlightGlobals.ship_tgtSpeed.ToString("0.0");
-                        currentUnit = "m/s";
-                    }
-                    else
-                    {
-                        currentSpeed = FlightGlobals.ship_obtSpeed.ToString("0.0");
-                        currentUnit = "m/s";
-                    }
-                    break;
+                switch (currentSpeedIndication)
+                {
+                    case KILOMETERS_PER_HOUR:
+                        currentUnit = "km/h";
+                        if (speedDisplayMode == FlightGlobals.SpeedDisplayModes.Surface)
+                        {
+                            currentSpeed = (FlightGlobals.ActiveVessel.srfSpeed * 3.6f).ToString("0.0");
+                        }
+                        else if (speedDisplayMode == FlightGlobals.SpeedDisplayModes.Target)
+                        {
+                            currentSpeed = (FlightGlobals.ship_tgtSpeed * 3.6f).ToString("0.0");
+                        }
+                        else
+                        {
+                            currentSpeed = (FlightGlobals.ship_obtSpeed * 3.6f).ToString("0.0");
+                        }
+                        break;
+                    case MILES_PER_HOUR:
+                        currentUnit = "mph";
+                        if (speedDisplayMode == FlightGlobals.SpeedDisplayModes.Surface)
+                        {
+                            currentSpeed = (FlightGlobals.ActiveVessel.srfSpeed * 2.23693629f).ToString("0.0");
+                        }
+                        else if (speedDisplayMode == FlightGlobals.SpeedDisplayModes.Target)
+                        {
+                            currentSpeed = (FlightGlobals.ship_tgtSpeed * 2.23693629f).ToString("0.0");
+                        }
+                        else
+                        {
+                            currentSpeed = (FlightGlobals.ship_obtSpeed * 2.23693629f).ToString("0.0");
+                        }
+                        break;
+                    case KNOTS:
+                        currentUnit = "knots";
+                        if (speedDisplayMode == FlightGlobals.SpeedDisplayModes.Surface)
+                        {
+                            currentSpeed = (FlightGlobals.ActiveVessel.srfSpeed * 1.94384449f).ToString("0.0");
+                        }
+                        else if (speedDisplayMode == FlightGlobals.SpeedDisplayModes.Target)
+                        {
+                            currentSpeed = (FlightGlobals.ship_tgtSpeed * 1.94384449f).ToString("0.0");
+                        }
+                        else
+                        {
+                            currentSpeed = (FlightGlobals.ship_obtSpeed * 1.94384449f).ToString("0.0");
+                        }
+                        break;
+                    case FEET_PER_SECOND:
+                        currentUnit = "ft/s";
+                        if (speedDisplayMode == FlightGlobals.SpeedDisplayModes.Surface)
+                        {
+                            currentSpeed = (FlightGlobals.ActiveVessel.srfSpeed * 3.2808399f).ToString("0.0");
+                        }
+                        else if (speedDisplayMode == FlightGlobals.SpeedDisplayModes.Target)
+                        {
+                            currentSpeed = (FlightGlobals.ship_tgtSpeed * 3.2808399f).ToString("0.0");
+                        }
+                        else
+                        {
+                            currentSpeed = (FlightGlobals.ship_obtSpeed * 3.2808399f).ToString("0.0");
+                        }
+                        break;
+                    case MACH:
+                        currentUnit = "Mach";
+                        if (speedDisplayMode == FlightGlobals.SpeedDisplayModes.Surface)
+                        {
+                            currentSpeed = (FlightGlobals.ActiveVessel.mach).ToString("0.00");
+                        }
+                        else if (speedDisplayMode == FlightGlobals.SpeedDisplayModes.Target)
+                        {
+                            currentSpeed = FlightGlobals.ship_tgtSpeed.ToString("0.0");
+                            currentUnit = "m/s";
+                        }
+                        else
+                        {
+                            currentSpeed = FlightGlobals.ship_obtSpeed.ToString("0.0");
+                            currentUnit = "m/s";
+                        }
+                        break;
+                }
+
+                display.textSpeed.text = currentSpeed + " " + currentUnit;
             }
-            
-            display.textSpeed.text = currentSpeed + " " + currentUnit;
         }
 
         private void UpdateAltitudeValue(FlightGlobals.SpeedDisplayModes speedDisplayMode)
         {
             double realAltitude = FlightGlobals.ActiveVessel.terrainAltitude > 0 ? FlightGlobals.ActiveVessel.altitude - FlightGlobals.ActiveVessel.terrainAltitude : FlightGlobals.ActiveVessel.altitude;
+            display.textTitle.overflowMode = TMPro.TextOverflowModes.Overflow;
             switch (speedDisplayMode)
             {
                 case FlightGlobals.SpeedDisplayModes.Surface:
+                    display.textTitle.enableWordWrapping = false;
                     switch (currentAltitudeIndication)
                     {
                         case METERS:
@@ -405,11 +417,10 @@ namespace SpeedUnitChanger
                     }
                     display.textTitle.fontSize = stockTitleFontSize;
                     display.textSpeed.fontSize = stockSpeedFontSize;
-                    display.textTitle.enableWordWrapping = false;
-                    display.textTitle.OverflowMode = TMPro.TextOverflowModes.Overflow;
                     display.textTitle.text = "AGL: " + altitudeText;
                     break;
                 case FlightGlobals.SpeedDisplayModes.Orbit:
+                    display.textTitle.enableWordWrapping = false;
                     double apoapsis = FlightGlobals.ActiveVessel.GetCurrentOrbit().ApA;
                     string apoapsisUnit = "m";
                     //Apoapsis: First check to avoid overflow: m to Mm
@@ -427,8 +438,11 @@ namespace SpeedUnitChanger
                     
                     StringBuilder titleDisplayText = new StringBuilder();
                     titleDisplayText.Append(string.Format("Ap:{0}{1}", apoapsis.ToString("0.000"), apoapsisUnit));
-                    display.textSpeed.fontSize = stockSpeedFontSize;
-                    display.textTitle.fontSize = stockTitleFontSize;
+                    if (showSpeed)
+                    {
+                        display.textSpeed.fontSize = stockSpeedFontSize;
+                        display.textTitle.fontSize = stockTitleFontSize;
+                    }
 
                     double periapsis = FlightGlobals.ActiveVessel.GetCurrentOrbit().PeA;
                     if (periapsis > 0)
@@ -446,24 +460,35 @@ namespace SpeedUnitChanger
                             periapsis = periapsis / 1000000;
                             periapsisUnit = "Mm";
                         }
-                        
-                        titleDisplayText.Append(Environment.NewLine);
-                        titleDisplayText.Append(string.Format("Pe:{0}{1}", periapsis.ToString("0.000"), periapsisUnit));
-                        display.textTitle.fontSize = 10;
-                        display.textSpeed.fontSize = 11;
-                        display.textTitle.enableWordWrapping = false;
-                        display.textTitle.OverflowMode = TMPro.TextOverflowModes.Overflow;
+                        if (showSpeed)
+                        {
+                            titleDisplayText.Append(Environment.NewLine);
+                            titleDisplayText.Append(string.Format("Pe:{0}{1}", periapsis.ToString("0.000"), periapsisUnit));
+                            display.textTitle.fontSize = 10;
+                            display.textSpeed.fontSize = 11;
+                        }
+                        else
+                        {
+                            display.textTitle.text = titleDisplayText.ToString();
+                            display.textSpeed.fontSize = display.textTitle.fontSize;
+                            display.textSpeed.text = string.Format("Pe:{0}{1}", periapsis.ToString("0.000"), periapsisUnit);
+                        }
                     }
 
                     display.textTitle.text = titleDisplayText.ToString();
                     break;
                 case FlightGlobals.SpeedDisplayModes.Target:
-                    string targetText = string.Format("->{0}", FlightGlobals.ActiveVessel.targetObject.GetName());
-                    display.textTitle.enableWordWrapping = true;
-                    display.textTitle.OverflowMode = TMPro.TextOverflowModes.Ellipsis;
+                    string displayText = string.Format("->{0}", FlightGlobals.ActiveVessel.targetObject.GetName());
+                    if(displayText.Length <= 18)
+                    {
+                        display.textTitle.text = displayText;
+                    }
+                    else
+                    {
+                        display.textTitle.text = string.Format("{0}{1}", displayText.Substring(0, 15), "...");
+                    }
                     display.textTitle.fontSize = stockTitleFontSize;
                     display.textSpeed.fontSize = stockSpeedFontSize;
-                    display.textTitle.text = targetText;
                     break;
             }
         }
