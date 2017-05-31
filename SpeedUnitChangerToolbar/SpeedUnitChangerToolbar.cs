@@ -70,6 +70,7 @@ namespace SpeedUnitChangerToolbar
                 ApplicationLauncher.Instance.RemoveModApplication(this.button);
                 this.addedToGUI = false;
             }
+            Destroy(this);
         }
     }
 }

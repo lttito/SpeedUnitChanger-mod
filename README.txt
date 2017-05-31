@@ -17,6 +17,7 @@ Now it also displays a window with the altitude depending on the unit selected f
 - feet
 
 Changelog:
+version 1.6.0: 1.3 Compatibility. Added toggle to not show speed on orbital mode.
 version 1.5.0: Added different Altitude modes to Navball title.
 version 1.4.3: 1.2 Compatibility. Also optimized code to not create several instances and less if checks.
 version 1.4.2: 1.1.X Compatibility. Now including Mach number as Unit to choose.
@@ -28,7 +29,7 @@ Version 1.1.0: 0.23.5 Compatibility.
 Version 1.0.0: Initial release. Writes speed in navball. Writes orbital, surface or target speed.
 Version 0.1.00: Initial version.
 
-/* Copyright © 2016, Eliseo Martín <lttito@gmail.com>
+/* Copyright © 2016 - 2017, Eliseo Martín <lttito@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
