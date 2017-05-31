@@ -262,20 +262,19 @@ namespace SpeedUnitChanger
 
         public void LateUpdate()
         {
-            FlightGlobals.SpeedDisplayModes speedDisplayMode = FlightGlobals.speedDisplayMode;
             if (display != null)
             {
-                UpdateSpeedValue(speedDisplayMode);
+                UpdateSpeedValue(FlightGlobals.speedDisplayMode);
                 if (showAltitude)
                 {
-                    UpdateAltitudeValue(speedDisplayMode);
+                    UpdateAltitudeValue(FlightGlobals.speedDisplayMode);
                 }
             }
         }
 
-        private void UpdateSpeedValue(FlightGlobals.SpeedDisplayModes speedDisplayMode)
+        private void UpdateSpeedValue(FlightGlobals.SpeedDisplayModes speedDisplayMode, bool forceCalculate = false)
         {
-            if (currentSpeedIndication != METERS_PER_SECOND && (showSpeed || speedDisplayMode != FlightGlobals.SpeedDisplayModes.Orbit || speedDisplayMode == FlightGlobals.SpeedDisplayModes.Orbit && !showAltitude))
+            if (currentSpeedIndication != METERS_PER_SECOND && (forceCalculate|| showSpeed || speedDisplayMode != FlightGlobals.SpeedDisplayModes.Orbit || speedDisplayMode == FlightGlobals.SpeedDisplayModes.Orbit && !showAltitude))
             {
                 switch (currentSpeedIndication)
                 {
@@ -473,6 +472,10 @@ namespace SpeedUnitChanger
                             display.textSpeed.fontSize = display.textTitle.fontSize;
                             display.textSpeed.text = string.Format("Pe:{0}{1}", periapsis.ToString("0.000"), periapsisUnit);
                         }
+                    }
+                    else
+                    {
+                        UpdateSpeedValue(FlightGlobals.speedDisplayMode, true);
                     }
 
                     display.textTitle.text = titleDisplayText.ToString();

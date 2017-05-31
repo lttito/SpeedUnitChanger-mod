@@ -17,6 +17,7 @@ Now it also displays a window with the altitude depending on the unit selected f
 - feet
 
 Changelog:
+version 1.6.1: Fix speed not calculating on orbital mode if Pe < 0
 version 1.6.0: 1.3 Compatibility. Added toggle to not show speed on orbital mode.
 version 1.5.0: Added different Altitude modes to Navball title.
 version 1.4.3: 1.2 Compatibility. Also optimized code to not create several instances and less if checks.
