@@ -209,4 +209,8 @@ FakesAssemblies/
 # LightSwitch generated files
 GeneratedArtifacts/
 _Pvt_Extensions/
+*.csproj
+.gitignore
+*.dll
 ModelManifest.xml
+*.sln
