@@ -19,7 +19,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using System.Threading.Tasks;
+//using System.Threading.Tasks;
 using KSP.IO;
 using KSP.UI.Screens.Flight;
 
@@ -33,7 +33,13 @@ namespace SpeedUnitChanger
         /// </summary>
         private static readonly string CONFIG_FILE = KSPUtil.ApplicationRootPath + "GameData/SpeedUnitChanger/settings.dat";
 
-        #region Constants
+        #region ENUMs
+        enum SpeedUnits { MetersPerSecond = 0, KilometersPerHour = 1, MilesPerHour = 2, Knots = 3, FeetPerSecond = 4, Mach = 5};
+        enum AltitudeUnits { Meters = 0, Kilometers = 1, Miles = 2, NauticalMiles = 3, Feed = 4};
+
+        #endregion ENUMs
+
+        #region Constants    
         /// <summary>
         /// Constant to indicate units are Meters per second
         /// </summary>
@@ -115,12 +121,15 @@ namespace SpeedUnitChanger
         private string altitudeText;
         private int currentSpeedIndication = METERS_PER_SECOND;
         private int currentAltitudeIndication = METERS;
+        private int digitsOfPrecision = 3;
+        private string precisionStr = "N3";
         private bool showAltitude = false;
         private bool showSpeed = true;
         private ConfigNode config;
         private Rect ConfigurationWindow;
         private string[] content;
         private string[] altitudeUnitNames;
+        private string[] digitsOfPrecisionStr;
         private SpeedDisplay display;
         private float stockTitleFontSize;
         private float stockSpeedFontSize;
@@ -132,6 +141,7 @@ namespace SpeedUnitChanger
             this.ConfigurationWindow = new Rect(50, 50, 280, 400);
             this.content = new string[6];
             this.altitudeUnitNames = new string[5];
+            this.digitsOfPrecisionStr = new string[4];
             content[METERS_PER_SECOND] = "Meters per second (m/s)";
             content[KILOMETERS_PER_HOUR] = "Kilometers per hour (km/h)";
             content[MILES_PER_HOUR] = "Miles per hour (mph)";
@@ -143,6 +153,10 @@ namespace SpeedUnitChanger
             altitudeUnitNames[MILES] = "Miles (mi)";
             altitudeUnitNames[NAUTICAL_MILES] = "Nautical miles (nmi)";
             altitudeUnitNames[FEET] = "Feet (ft)";
+            for (int i = 0; i < 4; i++)
+                digitsOfPrecisionStr[i] = i.ToString();
+            
+
         }
 
         /// <summary>
@@ -173,12 +187,14 @@ namespace SpeedUnitChanger
                 bool altWin = Convert.ToBoolean(config.GetValue("alt"));
                 int altunit = Convert.ToInt32(config.GetValue("altunit"));
                 bool sSpeed = Convert.ToBoolean(config.GetValue("sSpeed"));
+                int precision = Convert.ToInt32(config.GetValue("precision"));
 
                 config = null;
                 currentSpeedIndication = val;
                 showAltitude = altWin;
                 currentAltitudeIndication = altunit;
                 showSpeed = sSpeed;
+                digitsOfPrecision = precision;
             }
             catch (Exception)
             {
@@ -186,6 +202,7 @@ namespace SpeedUnitChanger
                 showAltitude = false;
                 currentAltitudeIndication = METERS;
                 showSpeed = true;
+                digitsOfPrecision = 3;
             }
         }
 
@@ -196,6 +213,7 @@ namespace SpeedUnitChanger
             savingNode.AddValue("alt", showAltitude.ToString());
             savingNode.AddValue("altunit", currentAltitudeIndication.ToString());
             savingNode.AddValue("sSpeed", showSpeed.ToString());
+            savingNode.AddValue("precision", digitsOfPrecision.ToString());
             try
             {
                 savingNode.Save(CONFIG_FILE);
@@ -230,7 +248,7 @@ namespace SpeedUnitChanger
             }
             if (ToolBarEnabled)
             {
-                ConfigurationWindow = GUI.Window(100, ConfigurationWindow, OnWindow, "Speed Unit Changer", HighLogic.Skin.window);
+                ConfigurationWindow = GUILayout.Window(100, ConfigurationWindow, OnWindow, "Speed Unit Changer", HighLogic.Skin.window);
             }
         }
 
@@ -241,8 +259,9 @@ namespace SpeedUnitChanger
         public void OnWindow(int windowId)
         {
             GUILayout.BeginVertical(GUILayout.Width(260f));
+
             showAltitude = GUILayout.Toggle(showAltitude, "Show AGL / Ap - Pe / Target Name");
-            if(showAltitude)
+            if (showAltitude)
             {
                 showSpeed = GUILayout.Toggle(showSpeed, "Show speed on Orbit Mode");
             }
@@ -256,6 +275,9 @@ namespace SpeedUnitChanger
             currentSpeedIndication = GUILayout.SelectionGrid(currentSpeedIndication, content, 1);
             GUILayout.Label("Altitude unit selection - AGL Mode only");
             currentAltitudeIndication = GUILayout.SelectionGrid(currentAltitudeIndication, altitudeUnitNames, 1);
+            GUILayout.Label("Digits of precision");
+            digitsOfPrecision = GUILayout.SelectionGrid(digitsOfPrecision, digitsOfPrecisionStr, 1);
+            precisionStr = "N" + digitsOfPrecision.ToString();
             GUILayout.EndVertical();
             GUI.DragWindow();
         }
@@ -274,7 +296,7 @@ namespace SpeedUnitChanger
 
         private void UpdateSpeedValue(FlightGlobals.SpeedDisplayModes speedDisplayMode, bool forceCalculate = false)
         {
-            if (currentSpeedIndication != METERS_PER_SECOND && (forceCalculate|| showSpeed || speedDisplayMode != FlightGlobals.SpeedDisplayModes.Orbit || speedDisplayMode == FlightGlobals.SpeedDisplayModes.Orbit && !showAltitude))
+            if (currentSpeedIndication != METERS_PER_SECOND && (forceCalculate || showSpeed || speedDisplayMode != FlightGlobals.SpeedDisplayModes.Orbit || speedDisplayMode == FlightGlobals.SpeedDisplayModes.Orbit && !showAltitude))
             {
                 switch (currentSpeedIndication)
                 {
@@ -376,16 +398,16 @@ namespace SpeedUnitChanger
                             if (altitude > THRESHOLD_TO_AUTO_CHANGE_M)
                             {
                                 altitude /= 1000000;
-                                altitudeText = altitude.ToString("0.000") + " Mm";
+                                altitudeText = altitude.ToString(precisionStr) + " Mm";
                             }
                             else if (altitude > THRESHOLD_TO_AUTO_CHANGE_K)
                             {
                                 altitude /= 1000;
-                                altitudeText = altitude.ToString("0.000") + " km";
+                                altitudeText = altitude.ToString(precisionStr) + " km";
                             }
                             else
                             {
-                                altitudeText = altitude.ToString("0.000") + " m";
+                                altitudeText = altitude.ToString(precisionStr) + " m";
                             }
                             break;
                         case KILOMETERS:
@@ -393,25 +415,25 @@ namespace SpeedUnitChanger
                             if (altitude > THRESHOLD_TO_AUTO_CHANGE_M)
                             {
                                 altitude /= 1000000;
-                                altitudeText = altitude.ToString("0.000") + " Mm";
+                                altitudeText = altitude.ToString(precisionStr) + " Mm";
                             }
                             else
                             {
                                 altitude /= 1000;
-                                altitudeText = altitude.ToString("0.000") + " km";
+                                altitudeText = altitude.ToString(precisionStr) + " km";
                             }
                             break;
                         case MILES:
                             altitude = realAltitude / 1609.344;
-                            altitudeText = altitude.ToString("0.000") + " mi";
+                            altitudeText = altitude.ToString(precisionStr) + " mi";
                             break;
                         case NAUTICAL_MILES:
                             altitude = realAltitude / 1852;
-                            altitudeText = altitude.ToString("0.000") + " nmi";
+                            altitudeText = altitude.ToString(precisionStr) + " nmi";
                             break;
                         case FEET:
                             altitude = realAltitude * 3.2808399;
-                            altitudeText = altitude.ToString("0.000") + " ft";
+                            altitudeText = altitude.ToString(precisionStr) + " ft";
                             break;
                     }
                     display.textTitle.fontSize = stockTitleFontSize;
@@ -434,9 +456,10 @@ namespace SpeedUnitChanger
                         apoapsis = apoapsis / 1000;
                         apoapsisUnit = "km";
                     }
-                    
-                    StringBuilder titleDisplayText = new StringBuilder();
-                    titleDisplayText.Append(string.Format("Ap:{0}{1}", apoapsis.ToString("0.000"), apoapsisUnit));
+
+                    //StringBuilder titleDisplayText = new StringBuilder();
+                    //titleDisplayText.Append(string.Format("Ap:{0}{1}", apoapsis.ToString("0.000"), apoapsisUnit));
+                    string titleDisplayText = "AP:" + apoapsis.ToString(precisionStr) + apoapsisUnit;
                     if (showSpeed)
                     {
                         display.textSpeed.fontSize = stockSpeedFontSize;
@@ -461,16 +484,20 @@ namespace SpeedUnitChanger
                         }
                         if (showSpeed)
                         {
-                            titleDisplayText.Append(Environment.NewLine);
-                            titleDisplayText.Append(string.Format("Pe:{0}{1}", periapsis.ToString("0.000"), periapsisUnit));
+                            //titleDisplayText.Append(Environment.NewLine);
+                            //titleDisplayText.Append(string.Format("Pe:{0}{1}", periapsis.ToString("0.000"), periapsisUnit));
+                            titleDisplayText += "\nPE:" + periapsis.ToString(precisionStr) + periapsisUnit;
+
                             display.textTitle.fontSize = 10;
                             display.textSpeed.fontSize = 11;
                         }
                         else
                         {
-                            display.textTitle.text = titleDisplayText.ToString();
+                            display.textTitle.text = titleDisplayText; // titleDisplayText.ToString();
+
                             display.textSpeed.fontSize = display.textTitle.fontSize;
-                            display.textSpeed.text = string.Format("Pe:{0}{1}", periapsis.ToString("0.000"), periapsisUnit);
+                            //display.textSpeed.text = string.Format("Pe:{0}{1}", periapsis.ToString("0.000"), periapsisUnit);
+                            display.textSpeed.text = "Pe:" + periapsis.ToString(precisionStr) + periapsisUnit;
                         }
                     }
                     else
@@ -478,17 +505,19 @@ namespace SpeedUnitChanger
                         UpdateSpeedValue(FlightGlobals.speedDisplayMode, true);
                     }
 
-                    display.textTitle.text = titleDisplayText.ToString();
+                    display.textTitle.text = titleDisplayText; // titleDisplayText.ToString();
                     break;
                 case FlightGlobals.SpeedDisplayModes.Target:
-                    string displayText = string.Format("->{0}", FlightGlobals.ActiveVessel.targetObject.GetName());
-                    if(displayText.Length <= 18)
+                    //string displayText = string.Format("->{0}", FlightGlobals.ActiveVessel.targetObject.GetName());
+                    string displayText = "->" + FlightGlobals.ActiveVessel.targetObject.GetName();
+                    if (displayText.Length <= 18)
                     {
                         display.textTitle.text = displayText;
                     }
                     else
                     {
-                        display.textTitle.text = string.Format("{0}{1}", displayText.Substring(0, 15), "...");
+                        //display.textTitle.text = string.Format("{0}{1}", displayText.Substring(0, 15), "...");
+                        display.textTitle.text = displayText.Substring(0, 15) + "...";
                     }
                     display.textTitle.fontSize = stockTitleFontSize;
                     display.textSpeed.fontSize = stockSpeedFontSize;

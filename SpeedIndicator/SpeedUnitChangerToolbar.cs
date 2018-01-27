@@ -38,6 +38,8 @@ namespace SpeedUnitChangerToolbar
 
         private void OnGuiAppLauncherReady()
         {
+            if (!HighLogic.CurrentGame.Parameters.CustomParams<SUC>().EnabledForSave)
+                return;
             if (!this.addedToGUI)
             { 
                 try
