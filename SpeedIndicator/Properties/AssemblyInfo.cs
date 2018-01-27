@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("lttito (Eliseo Martín)")]
 [assembly: AssemblyProduct("SpeedUnitChanger")]
-[assembly: AssemblyCopyright("Copyright © 2016 - 2017, Eliseo Martin. Distributed under the terms of the LGPLv3")]
+[assembly: AssemblyCopyright("Copyright © 2016 - 2018, Eliseo Martin. Distributed under the terms of the LGPLv3")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // Puede especificar todos los valores o establecer como predeterminados los números de compilación y de revisión 
 // mediante el carácter '*', como se muestra a continuación:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.6.1.*")]
-[assembly: AssemblyFileVersion("1.6.1")]
+[assembly: AssemblyVersion("1.7.0.*")]
+[assembly: AssemblyFileVersion("1.7.0")]

@@ -5,11 +5,6 @@ VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeedUnitChanger", "SpeedIndicator\SpeedUnitChanger.csproj", "{80E85F19-EE96-40B9-96A8-13565305A36C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeedUnitChangerToolbar", "SpeedUnitChangerToolbar\SpeedUnitChangerToolbar.csproj", "{8D086487-0042-4D44-96D7-8B8C01E1AB18}"
-	ProjectSection(ProjectDependencies) = postProject
-		{80E85F19-EE96-40B9-96A8-13565305A36C} = {80E85F19-EE96-40B9-96A8-13565305A36C}
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Textures", "Textures", "{1254D0E9-BD5B-485F-A3A8-11BCBA622426}"
 	ProjectSection(SolutionItems) = preProject
 		Textures\iconToolbar.png = Textures\iconToolbar.png
@@ -31,10 +26,6 @@ Global
 		{80E85F19-EE96-40B9-96A8-13565305A36C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{80E85F19-EE96-40B9-96A8-13565305A36C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{80E85F19-EE96-40B9-96A8-13565305A36C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8D086487-0042-4D44-96D7-8B8C01E1AB18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8D086487-0042-4D44-96D7-8B8C01E1AB18}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8D086487-0042-4D44-96D7-8B8C01E1AB18}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8D086487-0042-4D44-96D7-8B8C01E1AB18}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
