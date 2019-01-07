@@ -304,76 +304,76 @@ namespace SpeedUnitChanger
                         currentUnit = "km/h";
                         if (speedDisplayMode == FlightGlobals.SpeedDisplayModes.Surface)
                         {
-                            currentSpeed = (FlightGlobals.ActiveVessel.srfSpeed * 3.6f).ToString("0.0");
+                            currentSpeed = (FlightGlobals.ActiveVessel.srfSpeed * 3.6f).ToString(precisionStr);
                         }
                         else if (speedDisplayMode == FlightGlobals.SpeedDisplayModes.Target)
                         {
-                            currentSpeed = (FlightGlobals.ship_tgtSpeed * 3.6f).ToString("0.0");
+                            currentSpeed = (FlightGlobals.ship_tgtSpeed * 3.6f).ToString(precisionStr);
                         }
                         else
                         {
-                            currentSpeed = (FlightGlobals.ship_obtSpeed * 3.6f).ToString("0.0");
+                            currentSpeed = (FlightGlobals.ship_obtSpeed * 3.6f).ToString(precisionStr);
                         }
                         break;
                     case MILES_PER_HOUR:
                         currentUnit = "mph";
                         if (speedDisplayMode == FlightGlobals.SpeedDisplayModes.Surface)
                         {
-                            currentSpeed = (FlightGlobals.ActiveVessel.srfSpeed * 2.23693629f).ToString("0.0");
+                            currentSpeed = (FlightGlobals.ActiveVessel.srfSpeed * 2.23693629f).ToString(precisionStr);
                         }
                         else if (speedDisplayMode == FlightGlobals.SpeedDisplayModes.Target)
                         {
-                            currentSpeed = (FlightGlobals.ship_tgtSpeed * 2.23693629f).ToString("0.0");
+                            currentSpeed = (FlightGlobals.ship_tgtSpeed * 2.23693629f).ToString(precisionStr);
                         }
                         else
                         {
-                            currentSpeed = (FlightGlobals.ship_obtSpeed * 2.23693629f).ToString("0.0");
+                            currentSpeed = (FlightGlobals.ship_obtSpeed * 2.23693629f).ToString(precisionStr);
                         }
                         break;
                     case KNOTS:
                         currentUnit = "knots";
                         if (speedDisplayMode == FlightGlobals.SpeedDisplayModes.Surface)
                         {
-                            currentSpeed = (FlightGlobals.ActiveVessel.srfSpeed * 1.94384449f).ToString("0.0");
+                            currentSpeed = (FlightGlobals.ActiveVessel.srfSpeed * 1.94384449f).ToString(precisionStr);
                         }
                         else if (speedDisplayMode == FlightGlobals.SpeedDisplayModes.Target)
                         {
-                            currentSpeed = (FlightGlobals.ship_tgtSpeed * 1.94384449f).ToString("0.0");
+                            currentSpeed = (FlightGlobals.ship_tgtSpeed * 1.94384449f).ToString(precisionStr);
                         }
                         else
                         {
-                            currentSpeed = (FlightGlobals.ship_obtSpeed * 1.94384449f).ToString("0.0");
+                            currentSpeed = (FlightGlobals.ship_obtSpeed * 1.94384449f).ToString(precisionStr);
                         }
                         break;
                     case FEET_PER_SECOND:
                         currentUnit = "ft/s";
                         if (speedDisplayMode == FlightGlobals.SpeedDisplayModes.Surface)
                         {
-                            currentSpeed = (FlightGlobals.ActiveVessel.srfSpeed * 3.2808399f).ToString("0.0");
+                            currentSpeed = (FlightGlobals.ActiveVessel.srfSpeed * 3.2808399f).ToString(precisionStr);
                         }
                         else if (speedDisplayMode == FlightGlobals.SpeedDisplayModes.Target)
                         {
-                            currentSpeed = (FlightGlobals.ship_tgtSpeed * 3.2808399f).ToString("0.0");
+                            currentSpeed = (FlightGlobals.ship_tgtSpeed * 3.2808399f).ToString(precisionStr);
                         }
                         else
                         {
-                            currentSpeed = (FlightGlobals.ship_obtSpeed * 3.2808399f).ToString("0.0");
+                            currentSpeed = (FlightGlobals.ship_obtSpeed * 3.2808399f).ToString(precisionStr);
                         }
                         break;
                     case MACH:
                         currentUnit = "Mach";
                         if (speedDisplayMode == FlightGlobals.SpeedDisplayModes.Surface)
                         {
-                            currentSpeed = (FlightGlobals.ActiveVessel.mach).ToString("0.00");
+                            currentSpeed = (FlightGlobals.ActiveVessel.mach).ToString(precisionStr);
                         }
                         else if (speedDisplayMode == FlightGlobals.SpeedDisplayModes.Target)
                         {
-                            currentSpeed = FlightGlobals.ship_tgtSpeed.ToString("0.0");
+                            currentSpeed = FlightGlobals.ship_tgtSpeed.ToString(precisionStr);
                             currentUnit = "m/s";
                         }
                         else
                         {
-                            currentSpeed = FlightGlobals.ship_obtSpeed.ToString("0.0");
+                            currentSpeed = FlightGlobals.ship_obtSpeed.ToString(precisionStr);
                             currentUnit = "m/s";
                         }
                         break;
