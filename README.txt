@@ -32,7 +32,7 @@ Version 1.1.0: 0.23.5 Compatibility.
 Version 1.0.0: Initial release. Writes speed in navball. Writes orbital, surface or target speed.
 Version 0.1.00: Initial version.
 
-/* Copyright © 2016 - 2018, Eliseo Martín <lttito@gmail.com>
+/* Copyright © 2014-2019, Eliseo Martín <lttito@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by

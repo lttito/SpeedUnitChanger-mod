@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("lttito (Eliseo Martín)")]
 [assembly: AssemblyProduct("SpeedUnitChanger")]
-[assembly: AssemblyCopyright("Copyright © 2016 - 2019, Eliseo Martin. Distributed under the terms of the LGPLv3")]
+[assembly: AssemblyCopyright("Copyright © 2014-2019, Eliseo Martin. Distributed under the terms of the LGPLv3")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

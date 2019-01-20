@@ -1,3 +1,4 @@
+Added precission for speed
 Replaced the StringBuilder code with simple concatination for speed
 Added configurable significant digits
 Moved toolbar code into same DLL (saves 7 k, and no need to multiple DLLs)

@@ -1,4 +1,4 @@
-﻿/* Copyright © 2016, Eliseo Martín <lttito@gmail.com>
+﻿/* Copyright © 2014-2019, Eliseo Martín <lttito@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
